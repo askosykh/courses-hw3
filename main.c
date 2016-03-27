@@ -10,26 +10,40 @@ int check_argc_count( int argc ) {
 }
 
 // read numbers from file and fill the struct
-int read_from_file( char* filename ) {
+struct Node* read_from_file( char* filename ) {
 
     FILE* file = fopen( filename, "r" );
 
-    if( !file ) 
-        return 1;
+    if( !file )  {
+        printf( "Something went wrong. Cannot read data from file.\n");
+        return NULL;
+    }
+    struct Node* node = create_tree_from_file(file);
+    if (!node) {
+        fclose( file );
+        printf("cannot create tree from file.\n");
+        return NULL;
+    }
 
     fclose( file );
 
-    return 0;
+    return node;
 }
 
 // writing data from struct to file
-int write_to_file( char* filename ) {
+int write_to_file( struct Node* node, char* filename ) {
 
     FILE* file = fopen( filename, "w+" );
 
     if( !file )
         return 1;
+    if ( !node ) {
+        fclose( file );
+        return -1;
+    }
 
+    print_tree(node, file);
+    free_node(node);
     fclose( file );
 
     return 0;
@@ -42,13 +56,13 @@ int main( int argc, char* argv[] ) {
         printf( "Wrong arguements count.\n" );
         return 1;
     }
-
-    if ( read_from_file(argv[1]) ) {
-        printf( "Something went wrong. Cannot read data from file.\n");
+    struct Node* node = NULL;
+    node = read_from_file(argv[1]);
+    if ( !node ) {
         return 1;
     }
 
-    if ( write_to_file(argv[2]) ) {
+    if ( write_to_file(node, argv[2]) ) {
         printf( "Something went wrong. Cannot write data to file.\n" );
         return 1;
     }
